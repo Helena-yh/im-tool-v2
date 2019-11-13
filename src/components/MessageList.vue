@@ -2,10 +2,11 @@
   <div class="rong-message-history-list" >
       <div v-for="message in messageList" :key="message.uid">
         <div v-if='message.messageType == "TextMessage"' class="rong-message" >
-          <div class="rong-message-header" :class="[message.messageDirection == 1 ? 'rong-message-header-left':'rong-message-header-right']">
-              <img :src="message.content.user.portrait" alt="">
+          <div class="rong-message-header" :class="[message.messageDirection != 1 ? 'rong-message-header-left':'rong-message-header-right']">
+              <!-- <img src="message.content.user.portrait" alt=""> -->
+              <img src="https://avatars1.githubusercontent.com/u/10265829?s=96&v=4" alt="">
           </div>
-          <div class="rong-message-body" :class="[message.messageDirection == 1 ? 'rong-message-body-left':'rong-message-body-right']">
+          <div class="rong-message-body" :class="[message.messageDirection != 1 ? 'rong-message-body-left':'rong-message-body-right']">
             <div class="rong-Message-text" >
                 <pre class="rong-Message-entry">{{message.content.content}}</pre>
             </div>
@@ -13,20 +14,20 @@
           </div>
       </div>
       <div v-if='message.messageType == "ImageMessage"' class="rong-message" >
-          <div class="rong-message-header" :class="[message.messageDirection == 1 ? 'rong-message-header-left':'rong-message-header-right']">
+          <div class="rong-message-header" :class="[message.messageDirection != 1 ? 'rong-message-header-left':'rong-message-header-right']">
               <img src="message.content.user.portrait" alt="">
           </div>
-          <div class="rong-message-body" :class="[message.messageDirection == 1 ? 'rong-message-body-left':'rong-message-body-right']">
+          <div class="rong-message-body" :class="[message.messageDirection != 1 ? 'rong-message-body-left':'rong-message-body-right']">
             <div class="rong-Message-text">
                 <img :src="message.content.imageUri" alt="">
             </div>
           </div>
       </div>
       <div v-if='message.messageType == "FileMessage"' class="rong-message" >
-          <div class="rong-message-header" :class="[message.messageDirection == 1 ? 'rong-message-header-left':'rong-message-header-right']">
+          <div class="rong-message-header" :class="[message.messageDirection != 1 ? 'rong-message-header-left':'rong-message-header-right']">
               <img :src="message.content.user.portrait" alt="">
           </div>
-          <div class="rong-message-body" :class="[message.messageDirection == 1 ? 'rong-message-body-left':'rong-message-body-right']">
+          <div class="rong-message-body" :class="[message.messageDirection != 1 ? 'rong-message-body-left':'rong-message-body-right']">
             <div class="rong-Message-text">
                
             </div>
@@ -57,7 +58,8 @@ export default {
         getHistoryMessages:function(){
             var content = this;
             var conversationType = this.RongIMLib.ConversationType.PRIVATE;
-            var targetId = 'user11';
+            // var targetId = '7KSPDT0YK';
+            var targetId = 'user11'
             var timestrap = 0; // 默认传 null, 若从头开始获取历史消息, 请赋值为 0
             var count = 20;
             this.RongIMLib.RongIMClient.getInstance().getHistoryMessages(conversationType, targetId, timestrap, count, {
@@ -93,18 +95,17 @@ export default {
 .rong-message-body{
     position: relative;
     margin-right: 10px;
+    margin-top: 4px;
+    margin-left: 10px;
     line-height: 30px;
     color: #444;
-    background: #e2e2e2;
-    margin-left: 10px;
+    background: #f7f5f5;
     border-radius: 6px;
     display: inline-block;
-    margin-top: 4px;
     font-size: 14px;
     max-width: 350px;
     word-wrap: break-word;
     word-break: break-all;
-    padding: 10px;
     -webkit-box-shadow: 0 5px 10px 0 rgba(0,0,0,.1);
     box-shadow: 0 5px 10px 0 rgba(0,0,0,.1);
 }
@@ -124,7 +125,7 @@ export default {
     background-color: transparent;
     border: none;
     border-radius: 0;
-    font-family: "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
+    margin: 10px 0px;
 }
 .rong-message-header-left{
     position: absolute;

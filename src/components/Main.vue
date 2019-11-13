@@ -1,82 +1,98 @@
 <template>
-  <div class="rong-main">
-    <el-container>
-      <el-main>
-        <div class="rong-main-conversation">
-          <div class="rong-conversation-content">
-            <div class="rong-content-header">
-              <el-header>
-                <div class="rong-main-header">
-                  <img src="../../public/favicon.png" alt />
-                  <span>技术支持工具</span>
-                </div>
-              </el-header>
-            </div>
-
-            <div class="rong-message-list">
-              <!-- <component :is="MessageHistory"></component> -->
-              <div class="rong-message-history" v-if="MessageHistory">
-                  <MessageHistory :RongIMLib='RongIMLib'></MessageHistory> 
+  <div class="rong-app-main">
+    <div class="rong-main">
+      <el-container >
+        <el-aside width="80px" class="rong-menu" v-if="role == 'admin'">
+          <el-menu
+            default-active="1"
+            class="el-menu-vertical-demo"
+            @open="handleOpen"
+            @close="handleClose"
+          >
+            <el-menu-item index="1" class="rong-menu-item">
+              <i class="iconfont icon-dangqianhuihua"></i>
+            </el-menu-item>
+            <el-menu-item index="2" class="rong-menu-item">
+              <i class="iconfont icon-liebiao"></i>
+            </el-menu-item>
+          </el-menu>
+        </el-aside>
+        <el-aside width="300px">
+          <IssueList :role="role"></IssueList>
+        </el-aside>
+        <el-main>
+          <div class="rong-main-conversation">
+            <div class="rong-conversation-content">
+              <div class="rong-content-header">
+                <el-header>
+                  <div class="rong-main-header">
+                    <img src="../../public/favicon.png" alt />
+                    <span>技术支持工具</span>
+                  </div>
+                </el-header>
               </div>
-              <!-- <MessageHistory></MessageHistory> -->
-              <!-- <Message></Message> -->
-            </div>
-            <div class="rong-conversation-foot">
-              <SendBox :RongIMLib='RongIMLib'></SendBox>
+
+              <div class="rong-message-list">
+                <div class="rong-message-history" v-if="MessageHistory">
+                  <MessageHistory :RongIMLib="RongIMLib"></MessageHistory>
+                </div>
+                <!-- <MessageHistory></MessageHistory> -->
+                <!-- <Message></Message> -->
+              </div>
+              <div class="rong-conversation-foot">
+                <SendBox :RongIMLib="RongIMLib"></SendBox>
+              </div>
             </div>
           </div>
-        </div>
-      </el-main>
-      <el-aside width="300px">
-        <el-header>
-          <div class="rong-main-header">
-            <span>问题列表</span>
-          </div>
-        </el-header>Aside
-      </el-aside>
-    </el-container>
-    <!-- </el-container> -->
+        </el-main>
+      </el-container>
+    </div>
   </div>
 </template>
 
 <script>
-require('../assets/js/RongIMLib-2.5.1')
-require('../assets/js/protobuf-2.3.6.min.js')
+require("../assets/js/RongIMLib-2.5.1");
+require("../assets/js/protobuf-2.3.6.min.js");
+require("../assets/js/RongEmoji-2.2.7");
 
 var RongIMLib = window.RongIMLib;
 var RongIMClient = RongIMLib.RongIMClient;
 
 // import Message from "./Message.vue";
-import MessageHistory from "./MessageList.vue";
-import SendBox from "./input.vue";
+import MessageHistory from "./MessageList";
+import SendBox from "./Input";
+import IssueList from "./IssueList";
 
 export default {
   name: "mainBody",
-  props: {},
+  props: ["role", "token"],
   data() {
     return {
       textarea: "",
-      appkey: "n19jmcy59f1q9",
-      token: "0Jyrsvxb8JHmbmir77XaDq+YsUIoF3ojin3K277sfOntRMgXabjAUX5o4mupqj5mP1NVJtM2Okanegyd+qkdDqtdpZUyLdaH",
       MessageHistory: false,
-      RongIMLib:RongIMLib
+      RongIMLib: RongIMLib
     };
   },
   components: {
     // Message,
     MessageHistory,
-    SendBox
+    SendBox,
+    IssueList
   },
   mounted: function() {
+    console.info(this.role);
     this.init();
   },
   methods: {
     init: function() {
-      var appkey = this.appkey;
-      var token = this.token;
+      var appkey = this.config.appKey;
       var content = this;
-      if (!appkey || !token) {
-        alert("appkey 和 token 不能为空");
+      if (!appkey || !this.token) {
+        console.info(
+          this.config.appKey,
+          "appkey 和 token 不能为空",
+          this.token
+        );
       } else {
         RongIMClient.init(appkey, null);
         RongIMClient.setConnectionStatusListener({
@@ -122,17 +138,21 @@ export default {
 
         RongIMClient.setOnReceiveMessageListener({
           // 接收到的消息
-          onReceived: function() {
+          onReceived: function(message) {
             // addPromptInfo('新消息 ' + message.targetId + ':' + JSON.stringify(message))
             // alert(msg);
+            console.info(message);
           }
         });
 
-        RongIMClient.connect(token,{
+        RongIMClient.connect(
+          this.token,
+          {
             onSuccess: function() {
               // addPromptInfo('链接成功，用户id：' + userId)
               //  alert(userId)
               content.MessageHistory = true;
+              RongIMLib.RongIMEmoji.init();
             },
             onTokenIncorrect: function() {
               // addPromptInfo('token无效')
@@ -141,15 +161,30 @@ export default {
               // addPromptInfo(errorCode)
               alert(errorCode);
             }
-          },null);
+          },
+          null
+        );
       }
-    }
+    },
+    handleOpen(key, keyPath) {
+        console.log(key, keyPath);
+      },
+      handleClose(key, keyPath) {
+        console.log(key, keyPath);
+      }
   }
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.rong-menu{
+  background: #303840;
+  text-align: center;
+}
+.rong-menu-item{
+  background: #303840;
+}
 .rong-main {
   height: 100%;
   width: 100%;
@@ -209,8 +244,8 @@ export default {
   background: #e7e7e7;
   border-bottom: 1px solid #e7e7e7;
 }
-.rong-message-history{
-      overflow-y: scroll;
-    height: 100%;
+.rong-message-history {
+  overflow-y: scroll;
+  height: 100%;
 }
 </style>
