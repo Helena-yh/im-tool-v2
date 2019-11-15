@@ -88,13 +88,14 @@ body {
     border-radius: 5px;
     -webkit-box-shadow: 0 11px 20px 0 rgba(0,0,0,.3);
     box-shadow: 0 11px 20px 0 rgba(0,0,0,.3);
-    margin-top: 100px;
+    /* margin-top: 100px; */
 }
 
 .el-container .el-main{
   width: 100%;
   height: 100%;
   padding: 0;
+  min-width: 300px;
   /* border-radius: 4px 0; */
 }
 .el-container .el-header{
@@ -125,8 +126,8 @@ body {
 .el-container .el-menu{
   border: 0px;
 }
-.el-container .el-menu-item:focus, .el-menu-item:hover{
-  background: #363e46;
+.el-container .el-menu-item:hover{
+  background:#344252;
   color: #fff;
 }
 .el-container .el-menu-item.is-active{

@@ -1,7 +1,7 @@
 <template>
   <div class="rong-app-main">
     <div class="rong-main">
-      <el-container >
+      <el-container>
         <el-aside width="80px" class="rong-menu" v-if="role == 'admin'">
           <el-menu
             default-active="1"
@@ -9,38 +9,47 @@
             @open="handleOpen"
             @close="handleClose"
           >
-            <el-menu-item index="1" class="rong-menu-item">
-              <i class="iconfont icon-dangqianhuihua"></i>
-            </el-menu-item>
-            <el-menu-item index="2" class="rong-menu-item">
+            <el-menu-item index="1" class="rong-menu-item" @click="changeMenu('issue')">
               <i class="iconfont icon-liebiao"></i>
+            </el-menu-item>
+            <el-menu-item index="2" class="rong-menu-item" @click="changeMenu('conversation')">
+              <i class="iconfont icon-xiaoxi"></i>
             </el-menu-item>
           </el-menu>
         </el-aside>
         <el-aside width="300px">
-          <IssueList :role="role"></IssueList>
+          <IssueList v-if="showMenu == 'issue'" :role="role" :targetId="user.targetId"></IssueList>
+          <ConversationList v-if="showMenu == 'conversation'" :RongIMLib="RongIMLib" :user="user"></ConversationList>
         </el-aside>
         <el-main>
           <div class="rong-main-conversation">
             <div class="rong-conversation-content">
               <div class="rong-content-header">
-                <el-header>
-                  <div class="rong-main-header">
-                    <img src="../../public/favicon.png" alt />
-                    <span>技术支持工具</span>
-                  </div>
-                </el-header>
+                <Header :role="role" :groupId="user.targetId"></Header>
               </div>
 
               <div class="rong-message-list">
-                <div class="rong-message-history" v-if="MessageHistory">
-                  <MessageHistory :RongIMLib="RongIMLib"></MessageHistory>
+                <div
+                  class="rong-message-history"
+                  v-if="MessageHistory"
+                  ref="box1"
+                  @scroll="onScroll"
+                >
+                  <MessageHistory
+                    :RongIMLib="RongIMLib"
+                    :user="user"
+                    @setScrollTop="setScrollTop"
+                    :historyMore="historyMore"
+                  ></MessageHistory>
+                  <Message
+                    v-for="newMessage in newMessageList"
+                    :key="newMessage.messageUid"
+                    :message="newMessage"
+                  ></Message>
                 </div>
-                <!-- <MessageHistory></MessageHistory> -->
-                <!-- <Message></Message> -->
               </div>
               <div class="rong-conversation-foot">
-                <SendBox :RongIMLib="RongIMLib"></SendBox>
+                <SendBox :RongIMLib="RongIMLib" :user="user" @pushMessage="sendMessageHandle"></SendBox>
               </div>
             </div>
           </div>
@@ -58,29 +67,37 @@ require("../assets/js/RongEmoji-2.2.7");
 var RongIMLib = window.RongIMLib;
 var RongIMClient = RongIMLib.RongIMClient;
 
-// import Message from "./Message.vue";
+import Message from "./Message.vue";
 import MessageHistory from "./MessageList";
 import SendBox from "./Input";
 import IssueList from "./IssueList";
+import ConversationList from "./ConversationList";
+
+import Header from "./Header";
 
 export default {
   name: "mainBody",
-  props: ["role", "token"],
+  props: ["role", "token", "user"],
   data() {
     return {
       textarea: "",
       MessageHistory: false,
-      RongIMLib: RongIMLib
+      RongIMLib: RongIMLib,
+      newMessageList: [],
+      historyMore: 0,
+      mute: "禁言",
+      showMenu: "issue"
     };
   },
   components: {
-    // Message,
+    Message,
     MessageHistory,
     SendBox,
-    IssueList
+    IssueList,
+    Header,
+    ConversationList
   },
   mounted: function() {
-    console.info(this.role);
     this.init();
   },
   methods: {
@@ -98,50 +115,21 @@ export default {
         RongIMClient.setConnectionStatusListener({
           onChanged: function(status) {
             switch (status) {
-              case RongIMLib.ConnectionStatus["CONNECTED"]:
-              case 0:
-                // addPromptInfo('连接成功')
-                break;
-
-              case RongIMLib.ConnectionStatus["CONNECTING"]:
-              case 1:
-                // addPromptInfo('连接中')
-                break;
-
-              case RongIMLib.ConnectionStatus["DISCONNECTED"]:
-              case 2:
-                // addPromptInfo('当前用户主动断开链接')
-                break;
-
               case RongIMLib.ConnectionStatus["NETWORK_UNAVAILABLE"]:
               case 3:
-                // addPromptInfo('网络不可用')
-                break;
-
-              case RongIMLib.ConnectionStatus["CONNECTION_CLOSED"]:
-              case 4:
-                // addPromptInfo('未知原因，连接关闭')
-                break;
-
-              case RongIMLib.ConnectionStatus["KICKED_OFFLINE_BY_OTHER_CLIENT"]:
-              case 6:
-                // addPromptInfo('用户账户在其他设备登录，本机会被踢掉线')
-                break;
-
-              case RongIMLib.ConnectionStatus["DOMAIN_INCORRECT"]:
-              case 12:
-                // addPromptInfo('当前运行域名错误，请检查安全域名配置')
+                //重连
                 break;
             }
           }
         });
 
         RongIMClient.setOnReceiveMessageListener({
-          // 接收到的消息
           onReceived: function(message) {
-            // addPromptInfo('新消息 ' + message.targetId + ':' + JSON.stringify(message))
-            // alert(msg);
-            console.info(message);
+            if(message.messageType == "CutromInfo"){
+              localStorage.setItem("rong_user_" + message.content.groupId,message.content.userId);
+            }
+            content.newMessageList.push(message);
+            content.setScrollTop();
           }
         });
 
@@ -149,40 +137,81 @@ export default {
           this.token,
           {
             onSuccess: function() {
-              // addPromptInfo('链接成功，用户id：' + userId)
-              //  alert(userId)
               content.MessageHistory = true;
               RongIMLib.RongIMEmoji.init();
+              content.registerMessageType();
+              if ("cutrom" == content.role) {
+                content.cutromSendMessage();
+              }
             },
-            onTokenIncorrect: function() {
-              // addPromptInfo('token无效')
-            },
+            onTokenIncorrect: function() {},
             onError: function(errorCode) {
-              // addPromptInfo(errorCode)
-              alert(errorCode);
+              console.info("error:", errorCode);
             }
           },
           null
         );
       }
     },
-    handleOpen(key, keyPath) {
-        console.log(key, keyPath);
-      },
-      handleClose(key, keyPath) {
-        console.log(key, keyPath);
+    handleOpen: function(key, keyPath) {
+      console.log(key, keyPath);
+    },
+    handleClose: function(key, keyPath) {
+      console.log(key, keyPath);
+    },
+    sendMessageHandle: function(message) {
+      this.newMessageList.push(message);
+      this.setScrollTop();
+    },
+    setScrollTop: function() {
+      this.$nextTick(() => {
+        this.$refs.box1.scrollTop = this.$refs.box1.scrollHeight;
+      });
+    },
+    onScroll: function() {
+      if (this.$refs.box1.scrollTop < 50) {
+        this.historyMore++;
       }
+    },
+    changeMenu: function(menu) {
+      this.showMenu = menu;
+    },
+    cutromSendMessage: function() {
+      // let content = this;
+      var conversationType = RongIMLib.ConversationType.GROUP; // 群聊, 其他会话选择相应的消息类型即可
+      var targetId = this.user.targetId; // 目标 Id
+      var msg = new RongIMClient.RegisterMessage.CutromInfo({ groupId: this.user.targetId,userId:this.user.id});
+      RongIMLib.RongIMClient.getInstance().sendMessage(conversationType,targetId,msg,{
+        onSuccess: function(message) {
+          // content.textarea = "";
+          // content.$emit("pushMessage", message);
+          console.log("发送文本消息成功", message);
+          //列表中添加消息--通知父级元素
+        },
+        onError: function(errorCode, message) {
+          console.log("发送文本消息失败", message);
+        }
+      });
+    },
+    registerMessageType:function(){
+      var messageName = 'CutromInfo';  // 消息名称
+      var objectName = 's:cutrom';  // 消息内置名称，请按照此格式命名
+      var isCounted = false;  // 消息计数
+      var isPersited = true;  // 消息保存
+      var mesasgeTag = new RongIMLib.MessageTag(isCounted, isPersited);
+      var prototypes = ['userId','groupId'];  // 消息类中的属性名
+      RongIMClient.registerMessageType(messageName, objectName, mesasgeTag, prototypes);
+    }
   }
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-.rong-menu{
+.rong-menu {
   background: #303840;
   text-align: center;
 }
-.rong-menu-item{
+.rong-menu-item {
   background: #303840;
 }
 .rong-main {
@@ -235,17 +264,5 @@ export default {
   color: rgb(82, 82, 82);
   border-right: 1px solid #e7e7e7;
   background: #f5f5f5;
-}
-.rong-main-header {
-  height: 60px;
-  line-height: 60px;
-  font-size: 1.5rem;
-  color: #666;
-  background: #e7e7e7;
-  border-bottom: 1px solid #e7e7e7;
-}
-.rong-message-history {
-  overflow-y: scroll;
-  height: 100%;
 }
 </style>

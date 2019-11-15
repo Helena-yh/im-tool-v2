@@ -2,14 +2,14 @@
   <div class="rong-login">
     <div class="rong-login-main" v-if="!mainShow">
       <img class="rong-login-logo" src="../assets/logo_blue.png" alt />
-      <el-input class="rong-login-input" placeholder="请输入群组 ID" v-model="groupId" clearable></el-input>
-      <el-input class="rong-login-input" placeholder="请输入手机号" v-model="userId" clearable></el-input>
-      <el-input class="rong-login-input" placeholder="请输名称" v-model="name" clearable></el-input>
+      <el-input class="rong-login-input" placeholder="请输入群组 ID" v-model="user.targetId" clearable></el-input>
+      <el-input class="rong-login-input" placeholder="请输入手机号" v-model="user.id" clearable></el-input>
+      <el-input class="rong-login-input" placeholder="请输名称" v-model="user.name" clearable></el-input>
       <el-button type="primary" @click="login()">加入</el-button>
     </div>
 
     <div v-if="mainShow">
-      <Main :role="role" :token="token" :groupId="groupId"></Main>
+      <Main :role="role" :token="token" :user="user"></Main>
     </div>
   </div>
 </template>
@@ -22,12 +22,13 @@ export default {
   data() {
     return {
       role: "admin",
-    //   input: "",
-      name: "",
       mainShow: false,
-      userId: "",
       token: "",
-      groupId: ""
+      user: {
+        id: "",
+        name: "",
+        targetId: ""
+      }
     };
   },
   components: {
@@ -35,18 +36,17 @@ export default {
   },
   methods: {
     login: function() {
-        this.getToken();
-    //   this.joinGroup();
+      this.joinGroup();
     },
     joinGroup: function() {
       let group = {
-        id: this.groupId,
-        name: this.name,
-        memberId: this.userId
+        id: this.user.targetId,
+        name: this.user.name,
+        memberId: this.user.id
       };
       this.$axios.post(this.config.host + "/group/join", group).then(res => {
         if (res.data.code == 200) {
-            this.getToken();
+          this.getToken();
           return;
         }
         this.$message({
@@ -57,7 +57,7 @@ export default {
       });
     },
     getToken: function() {
-      if (!this.userId) {
+      if (!this.user.id) {
         this.$message({
           showClose: true,
           message: "手机号不可为空！",
@@ -65,11 +65,10 @@ export default {
         });
         return;
       }
-      var data = { id: this.userId };
+      var data = { id: this.user.id };
       this.$axios.post(this.config.host + "/user/get_token", data).then(res => {
         if (res.data.code == 200) {
           this.token = res.data.result.token;
-          console.info(this.token);
           this.mainShow = true;
           return;
         }
@@ -79,6 +78,21 @@ export default {
           type: "error"
         });
       });
+    },
+    saveUserInfo:function(key,value){
+      localStorage.setItem("rong_user_" + key,value);
+    },
+    getUserInfo:function(){
+      let user = {};
+      let portrait = localStorage.getItem("rong_user_portrait");
+      if(!portrait){
+        portrait = Math.ceil(Math.random()*6);
+        this.saveUserInfo('portrait',portrait);
+      }
+    //   console.info('-----user.name',this.user.name);
+      this.saveUserInfo('name',this.user.name);
+      user.portrait = '../assets/portrait/0' + portrait + '.jpg';
+      return user;
     }
   }
 };
@@ -91,5 +105,8 @@ export default {
 }
 .rong-login-input {
   padding-bottom: 20px;
+}
+.rong-login-main {
+  margin-top: calc(50vh - 206px);
 }
 </style>

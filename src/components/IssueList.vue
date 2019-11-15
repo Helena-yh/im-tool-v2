@@ -10,7 +10,6 @@
       <el-collapse accordion>
         <el-collapse-item v-for="issue in issueList" :key="issue.questionId" class="rong-issue-item">
           <template slot="title" class="rong-issue-body">
-            <!-- <i v-if="role == 'custom'":class="['rong-issue-status','iconfont','status' ? 'icon-daichuli-copy' : 'icon-chenggongyijiejue']"></i> -->
             <el-dropdown trigger="click" v-if="role == 'admin'">
                 <i :class="['rong-issue-status','iconfont','status' ? 'icon-daichuli-copy' : 'icon-chenggongyijiejue']"></i>
                 <el-dropdown-menu slot="dropdown">
@@ -19,12 +18,10 @@
                 </el-dropdown-menu>
             </el-dropdown>
             <i v-else :class="['rong-issue-status','iconfont','status' ? 'icon-daichuli-copy' : 'icon-chenggongyijiejue']"></i>
-            <!-- <el-tooltip class="item" effect="dark" :content="issue.description" placement="left-end"> -->
             <input :title="issue.description" class="rong-issue-description" type="text" 
                     v-model="issue.description" 
                     @change="updateIssue(issue)"/>
             <i  v-if="role == 'admin'" class="rong-issue-delete iconfont icon-delete" @click="deleteIssue(issue)"></i>
-            <!-- </el-tooltip> -->
           </template>
           <textarea class="rong-issue-solution" v-model="issue.solution" :readonly="role =='cutrom'"></textarea>
         </el-collapse-item>
@@ -36,7 +33,7 @@
 <script>
 export default {
   name: "issueList",
-  props: ["role"],
+  props: ["role","targetId"],
   data() {
     return {
       issueList: [],
@@ -47,7 +44,7 @@ export default {
   },
   methods: {
     addIssue: function() {
-      var data = { solution: "123", description: "123" }; //定义一个data储存需要带的参数
+      var data = { groupId: this.targetId,solution: "123", description: "123" }; //定义一个data储存需要带的参数
       this.$axios.post(this.config.host + "/question/add", data).then(res => {
           console.info(res);
           if (res.data.code == 200) {
@@ -63,7 +60,8 @@ export default {
         });
     },
     getIssueList: function() {
-      this.$axios.get(this.config.host + "/question/search_all").then(res => {
+        var data = { groupId: this.targetId };
+      this.$axios.post(this.config.host + "/question/search_all",data).then(res => {
           if (res.data.code == 200) {
               this.issueList = res.data.result;
             console.info(res);
@@ -77,8 +75,6 @@ export default {
         });
     },
     updateIssue: function(issue) {
-    //   var data ={; 
-    //   data[key] = value;
       this.$axios.post(this.config.host + "/question/modify", issue).then(res => {
           if (res.data.code == 200) {
             console.info(res);
@@ -97,7 +93,6 @@ export default {
       var data = { id: issue.id} 
       this.$axios.post(this.config.host + "/question/delete", data).then(res => {
           if (res.data.code == 200) {
-            // console.info(res);
             this.getIssueList();
             return;
           }
@@ -144,8 +139,6 @@ export default {
     color: #e7e7e7
 }
 .rong-issue-add:hover{
-    /* -webkit-transform: rotate(1turn);
-    transform: rotate(1turn); */
     color: #5cadff;
 }
 .rong-issue-status{

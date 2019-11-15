@@ -16,7 +16,7 @@
 <script>
 export default {
   name: "sendBox",
-  props: ["RongIMLib"],
+  props: ["RongIMLib","user"],
   data() {
     return {
       textarea: "",
@@ -31,28 +31,32 @@ export default {
       }
       var msg = new this.RongIMLib.TextMessage({
         content: this.textarea,
-        extra: "附加信息",
-        user : { // 当前用户(发送者) 信息
-            "id" : "user1",
-            "name" : "张三",
-            "portrait" : "https://cdn.ronghub.com/thinking-face.png"
-        },
+        extra: "",
+        user : this.user,
       });
       this.sendMessage(msg);
     },
     sendMessage: function(msg) {
       let content = this;
-      var conversationType = this.RongIMLib.ConversationType.PRIVATE; // 群聊, 其他会话选择相应的消息类型即可
+      var conversationType = this.RongIMLib.ConversationType.GROUP; // 群聊, 其他会话选择相应的消息类型即可
       // var targetId = "7KSPDT0YK"; // 目标 Id
-       var targetId = "user11"; // 目标 Id
+       var targetId = this.user.targetId; // 目标 Id
       this.RongIMLib.RongIMClient.getInstance().sendMessage(conversationType, targetId, msg, {
         onSuccess: function (message) {
             content.textarea = '';
+            content.$emit('pushMessage', message);
             console.log('发送文本消息成功', message);
             //列表中添加消息--通知父级元素
         },
         onError: function (errorCode,message) {
             console.log('发送文本消息失败', message);
+            if(errorCode == 22408){
+              content.$message({
+                showClose: true,
+                message: "会话失效，请联系管理员或续费",
+                type: "error"
+              });
+            }
         }
     });
     },
