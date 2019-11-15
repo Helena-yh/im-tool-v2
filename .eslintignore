@@ -3,3 +3,4 @@ src/assets/RongIMLib-2.5.1.js
 src/assets/RongEmoji-2.2.7.js
 src/assets/protobuf-2.3.5.min.js
 src/assets/protobuf-2.3.6.min.js
+src/assets/js/upload/qiniu.js

@@ -64,6 +64,10 @@ require("../assets/js/RongIMLib-2.5.1");
 require("../assets/js/protobuf-2.3.6.min.js");
 require("../assets/js/RongEmoji-2.2.7");
 
+// require("../assets/js/upload/qiniu");
+// require("../assets/js/upload/upload");
+// require("../assets/js/upload/init");
+
 var RongIMLib = window.RongIMLib;
 var RongIMClient = RongIMLib.RongIMClient;
 
