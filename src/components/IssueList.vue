@@ -11,19 +11,23 @@
         <el-collapse-item v-for="issue in issueList" :key="issue.questionId" class="rong-issue-item">
           <template slot="title" class="rong-issue-body">
             <el-dropdown trigger="click" v-if="role == 'admin'">
-                <i :class="['rong-issue-status','iconfont','status' ? 'icon-daichuli-copy' : 'icon-chenggongyijiejue']"></i>
+                <i :class="['rong-issue-status','iconfont', issue.status == 0 ? 'icon-daichuli-copy' : 'icon-chenggongyijiejue']" :status="issue.status"></i>
                 <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item><i class="rong-issue-status iconfont icon-chenggongyijiejue"></i>解决</el-dropdown-item>
-                    <el-dropdown-item><i class="rong-issue-status iconfont icon-daichuli-copy"></i>处理中</el-dropdown-item>
+                    <el-dropdown-item >
+                      <div @click="changeStatus(1,issue)"><i class="rong-issue-status iconfont icon-chenggongyijiejue"></i>解决</div>
+                    </el-dropdown-item>
+                    <el-dropdown-item>
+                      <div @click="changeStatus(0,issue)"><i class="rong-issue-status iconfont icon-daichuli-copy"></i>处理中</div>
+                    </el-dropdown-item>
                 </el-dropdown-menu>
             </el-dropdown>
-            <i v-else :class="['rong-issue-status','iconfont','status' ? 'icon-daichuli-copy' : 'icon-chenggongyijiejue']"></i>
+            <i v-else :class="['rong-issue-status','iconfont',issue.status == 0 ? 'icon-daichuli-copy' : 'icon-chenggongyijiejue']"></i>
             <input :title="issue.description" class="rong-issue-description" type="text" 
                     v-model="issue.description" 
                     @change="updateIssue(issue)"/>
             <i  v-if="role == 'admin'" class="rong-issue-delete iconfont icon-delete" @click="deleteIssue(issue)"></i>
           </template>
-          <textarea class="rong-issue-solution" v-model="issue.solution" :readonly="role =='cutrom'"></textarea>
+          <textarea class="rong-issue-solution" v-model="issue.solution" :readonly="role =='cutrom'"  @change="updateIssue(issue)"></textarea>
         </el-collapse-item>
       </el-collapse>
     </div>
@@ -63,8 +67,7 @@ export default {
         var data = { groupId: this.targetId };
       this.$axios.post(this.config.host + "/question/search_all",data).then(res => {
           if (res.data.code == 200) {
-              this.issueList = res.data.result;
-            console.info(res);
+            this.issueList = res.data.result;
             return;
           }
           this.$message({
@@ -102,6 +105,11 @@ export default {
             type: "error"
           });
         });
+    },
+    changeStatus: function(command,issue){
+      console.info('ads',command,issue)
+      issue.status = command;
+      this.updateIssue(issue);
     }
   }
 };
@@ -172,5 +180,11 @@ export default {
 }
 .rong-issue-item{
     padding-left: 10px;
+}
+.icon-chenggongyijiejue{
+  color: #19ad77;
+}
+.icon-chenggongyijiejue:hover{
+  color: #19ad77;
 }
 </style>

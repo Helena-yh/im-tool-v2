@@ -18,9 +18,13 @@
       <div v-if='message.messageType == "ImageMessage"' class="rong-message" >
           <div class="rong-message-header" :class="[message.messageDirection != 1 ? 'rong-message-header-left':'rong-message-header-right']">
               <!-- <img :src="message.content.user.portrait" alt=""> -->
+              <img src="../assets/portrait/01.jpg" alt="">
           </div>
           <div class="rong-message-body" :class="[message.messageDirection != 1 ? 'rong-message-body-left':'rong-message-body-right']">
-            <div class="rong-Message-text">
+            <div class="rong-message-username">{{message.content.user.name}}</div>
+            <div class="rong-Message-img">
+                
+                <!-- <img :src="'data:image/jpeg;base64,' + message.content.content" alt=""> -->
                 <img :src="message.content.imageUri" alt="">
             </div>
           </div>
@@ -29,10 +33,17 @@
       <div v-if='message.messageType == "FileMessage"' class="rong-message" >
           <div class="rong-message-header" :class="[message.messageDirection != 1 ? 'rong-message-header-left':'rong-message-header-right']">
               <!-- <img :src="message.content.user.portrait" alt=""> -->
+
+              <img src="../assets/portrait/01.jpg" alt="">
           </div>
           <div class="rong-message-body" :class="[message.messageDirection != 1 ? 'rong-message-body-left':'rong-message-body-right']">
+            <div class="rong-message-username">{{message.content.user.name}}</div>
             <div class="rong-Message-text">
-               
+                <div class="rongcloud-sprite rongcloud-file-icon"></div>            
+                <div class="rongcloud-file-name">{{message.content.name}}</div>            
+                <div class="rongcloud-file-size">{{message.content.size}}</div>            
+                <a class="rongcloud-sprite rongcloud-file-download" :href="message.content.fileUrl"></a>
+               <!-- {{message.content.user.name}} -->
             </div>
           </div>
       </div>
@@ -129,6 +140,13 @@ export default {
     word-break: break-all;
     -webkit-box-shadow: 0 5px 10px 0 rgba(0,0,0,.1);
     box-shadow: 0 5px 10px 0 rgba(0,0,0,.1)
+}
+.rong-Message-img{
+    max-width: 120px;
+}
+.rong-Message-img img{
+    max-width: 120px;
+    max-height: 180px;
 }
 .rong-Message-entry{
     font-size: 14px;

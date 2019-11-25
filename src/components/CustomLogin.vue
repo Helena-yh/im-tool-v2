@@ -40,8 +40,29 @@ export default {
   },
   methods: {
     login: function() {
-      this.getToken();
-      this.getUserInfo();
+      // this.getToken();
+      // this.getUserInfo();
+      this.joinGroup();
+    },
+    joinGroup: function() {
+      let group = {
+        groupId: this.user.targetId,
+        // name: this.user.name,
+        memberIds: [this.user.id],
+        clientIds: [this.user.id]
+      };
+      this.$axios.post(this.config.host + "/group/join", group).then(res => {
+        if (res.data.code == 200) {
+          this.getToken();
+          this.getUserInfo();
+          return;
+        }
+        this.$message({
+          showClose: true,
+          message: "加入群组失败",
+          type: "error"
+        });
+      });
     },
     getToken: function() {
       var data = { id: this.user.id };

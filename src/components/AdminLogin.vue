@@ -40,9 +40,9 @@ export default {
     },
     joinGroup: function() {
       let group = {
-        id: this.user.targetId,
-        name: this.user.name,
-        memberId: this.user.id
+        groupId: this.user.targetId,
+        // name: this.user.name,
+        memberIds: [this.user.id],
       };
       this.$axios.post(this.config.host + "/group/join", group).then(res => {
         if (res.data.code == 200) {

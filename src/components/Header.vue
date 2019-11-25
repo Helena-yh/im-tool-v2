@@ -5,7 +5,7 @@
       <span>技术支持工具</span>
 
       <el-tooltip class="item" effect="dark" :content="muteTitle[mute]" placement="bottom" v-if="role == 'admin'">
-        <i :class="['iconfont',  mute ? 'icon-xiaoxi':'icon-jinyan']" @click="muteClick()"></i>
+        <i :class="['iconfont',  mute ? 'icon-xiaoxi':'icon-jinyan']" @click="setInfos()"></i>
       </el-tooltip>
     </div>
   </el-header>
@@ -22,8 +22,7 @@ export default {
         1: "解禁"
       },
       mute: 0,
-      minute: 29 * 24 * 60,
-      memberIds: localStorage.getItem("rong_user_" + this.groupId)
+      clientIds: []
     };
   },
   mounted: function() {
@@ -31,12 +30,12 @@ export default {
   },
   methods: {
     getMuteStatus: function() {
-      var data = { ids: [this.groupId]}; 
+      let content = this;
+      var data = { groupIds: [this.groupId]}; 
       this.$axios.post(this.config.host + "/group/get_infos", data).then(res => {
-        console.info(res);
         if (res.data.code == 200) {
-          console.info(res);
-          this.mute = res.data.result[0].muteStatus;
+          content.mute = res.data.result[0].muteStatus;
+          content.clientIds = res.data.result[0].clientIds;
           return;
         }
         this.$message({
@@ -46,54 +45,42 @@ export default {
         });
       });
     },
-    addMute: function() {
-      let memberIds = this.memberIds;
+    setInfos:function(){
+      let content = this;
+      let status = this.mute ? 0 : 1;
       let data = {
-        id: this.groupId,
-        memberIds: [memberIds],
-        minute: this.minute
-      }; //定义一个data储存需要带的参数
-      this.$axios.post(this.config.host + "/group/mute", data).then(res => {
-        console.info(res);
+        groupId: this.groupId,
+        muteStatus: status,
+        clientIds: this.clientIds
+      }; 
+      this.$axios.post(this.config.host + "/group/set_infos", data).then(res => {
         if (res.data.code == 200) {
-          console.info(res);
-        //   this.getIssueList();
+          
+          this.$message({
+            showClose: true,
+            message: content.muteTitle[content.mute] + "成功",
+            type: "success"
+          });
+          content.mute = status;
           return;
+          
         }
         this.$message({
           showClose: true,
-          message: "群组禁言失败",
+          message: content.muteTitle[status] + "失败",
           type: "error"
         });
       });
     },
-    removeMute: function() {
-      var data = { id: this.groupId,memberIds:[this.memberIds],muteStatus: 0}; //定义一个data储存需要带的参数
-      this.$axios
-        .post(this.config.host + "/group/set_mute_status", data)
-        .then(res => {
-          console.info(res);
-          if (res.data.code == 200) {
-            console.info(res);
-            // this.getIssueList();
-            return;
-          }
-          this.$message({
-            showClose: true,
-            message: "群组解禁失败",
-            type: "error"
-          });
-        });
-    },
-    muteClick: function() {
-    //   this.mute = this.mute ? 0 : 1;
-      if (!this.mute) {
-        this.addMute();
-        this.mute = 1;
-      }
-      this.removeMute();
-      this.mute = 0;
-    }
+    // muteClick: function() {
+    // //   this.mute = this.mute ? 0 : 1;
+    //   // if (!this.mute) {
+    //   //   this.setInfos();
+
+    //   // }
+    //   this.setInfos(this.mute);
+    //   // this.mute = 0;
+    // }
   }
 };
 </script>

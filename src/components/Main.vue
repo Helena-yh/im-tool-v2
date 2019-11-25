@@ -3,12 +3,7 @@
     <div class="rong-main">
       <el-container>
         <el-aside width="80px" class="rong-menu" v-if="role == 'admin'">
-          <el-menu
-            default-active="1"
-            class="el-menu-vertical-demo"
-            @open="handleOpen"
-            @close="handleClose"
-          >
+          <el-menu default-active="1" class="el-menu-vertical-demo">
             <el-menu-item index="1" class="rong-menu-item" @click="changeMenu('issue')">
               <i class="iconfont icon-liebiao"></i>
             </el-menu-item>
@@ -19,7 +14,7 @@
         </el-aside>
         <el-aside width="300px">
           <IssueList v-if="showMenu == 'issue'" :role="role" :targetId="user.targetId"></IssueList>
-          <ConversationList v-if="showMenu == 'conversation'" :RongIMLib="RongIMLib" :user="user"></ConversationList>
+          <ConversationList v-if="showMenu == 'conversation'" :RongIMLib="RongIMLib" :user="user" @changeConversation="changeConversation"></ConversationList>
         </el-aside>
         <el-main>
           <div class="rong-main-conversation">
@@ -29,18 +24,12 @@
               </div>
 
               <div class="rong-message-list">
-                <div
-                  class="rong-message-history"
-                  v-if="MessageHistory"
-                  ref="box1"
-                  @scroll="onScroll"
-                >
+                <div class="rong-message-history" v-if="MessageHistory" ref="box1" @scroll="onScroll">
                   <MessageHistory
                     :RongIMLib="RongIMLib"
                     :user="user"
                     @setScrollTop="setScrollTop"
-                    :historyMore="historyMore"
-                  ></MessageHistory>
+                    :historyMore="historyMore"></MessageHistory>
                   <Message
                     v-for="newMessage in newMessageList"
                     :key="newMessage.messageUid"
@@ -66,7 +55,7 @@ require("../assets/js/RongEmoji-2.2.7");
 
 // require("../assets/js/upload/qiniu");
 // require("../assets/js/upload/upload");
-// require("../assets/js/upload/init");
+// require("../assets/js/upload/upload");
 
 var RongIMLib = window.RongIMLib;
 var RongIMClient = RongIMLib.RongIMClient;
@@ -143,10 +132,10 @@ export default {
             onSuccess: function() {
               content.MessageHistory = true;
               RongIMLib.RongIMEmoji.init();
-              content.registerMessageType();
-              if ("cutrom" == content.role) {
-                content.cutromSendMessage();
-              }
+              // content.registerMessageType();
+              // if ("cutrom" == content.role) {
+              //   content.cutromSendMessage();
+              // }
             },
             onTokenIncorrect: function() {},
             onError: function(errorCode) {
@@ -156,12 +145,6 @@ export default {
           null
         );
       }
-    },
-    handleOpen: function(key, keyPath) {
-      console.log(key, keyPath);
-    },
-    handleClose: function(key, keyPath) {
-      console.log(key, keyPath);
     },
     sendMessageHandle: function(message) {
       this.newMessageList.push(message);
@@ -180,31 +163,11 @@ export default {
     changeMenu: function(menu) {
       this.showMenu = menu;
     },
-    cutromSendMessage: function() {
-      // let content = this;
-      var conversationType = RongIMLib.ConversationType.GROUP; // 群聊, 其他会话选择相应的消息类型即可
-      var targetId = this.user.targetId; // 目标 Id
-      var msg = new RongIMClient.RegisterMessage.CutromInfo({ groupId: this.user.targetId,userId:this.user.id});
-      RongIMLib.RongIMClient.getInstance().sendMessage(conversationType,targetId,msg,{
-        onSuccess: function(message) {
-          // content.textarea = "";
-          // content.$emit("pushMessage", message);
-          console.log("发送文本消息成功", message);
-          //列表中添加消息--通知父级元素
-        },
-        onError: function(errorCode, message) {
-          console.log("发送文本消息失败", message);
-        }
+    changeConversation:function(conversation){
+      this.$nextTick(() => {
+        this.user.groupId = conversation.targetId;
       });
-    },
-    registerMessageType:function(){
-      var messageName = 'CutromInfo';  // 消息名称
-      var objectName = 's:cutrom';  // 消息内置名称，请按照此格式命名
-      var isCounted = false;  // 消息计数
-      var isPersited = true;  // 消息保存
-      var mesasgeTag = new RongIMLib.MessageTag(isCounted, isPersited);
-      var prototypes = ['userId','groupId'];  // 消息类中的属性名
-      RongIMClient.registerMessageType(messageName, objectName, mesasgeTag, prototypes);
+      
     }
   }
 };
