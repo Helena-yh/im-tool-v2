@@ -4,6 +4,7 @@
       <div class="rong-issue-header">
         <span>问题列表</span>
         <i class="rong-issue-add iconfont icon-ziyuan" @click="addIssue()"></i>
+        <i v-if="role == 'admin'" class="rong-issue-pdf iconfont icon-shengchengpdf" @click="downLoadPDF()"></i>
       </div>
     </el-header>
     <div class="rong-issue-list">
@@ -21,7 +22,7 @@
                     </el-dropdown-item>
                 </el-dropdown-menu>
             </el-dropdown>
-            <i v-else :class="['rong-issue-status','iconfont',issue.status == 0 ? 'icon-daichuli-copy' : 'icon-chenggongyijiejue']"></i>
+            <i v-else :class="['rong-issue-status','rong-issue-custrom','iconfont',issue.status == 0 ? 'icon-daichuli-copy' : 'icon-chenggongyijiejue']"></i>
             <input :title="issue.description" class="rong-issue-description" type="text" 
                     v-model="issue.description" 
                     @change="updateIssue(issue)"/>
@@ -110,6 +111,9 @@ export default {
       console.info('ads',command,issue)
       issue.status = command;
       this.updateIssue(issue);
+    },
+    downLoadPDF:function() {
+      this.$emit("downLoadPDF",this.issueList);
     }
   }
 };
@@ -137,6 +141,14 @@ export default {
     right: 10px;
     display: inline-block;
 } 
+.rong-issue-pdf{
+    position: absolute;
+    right: 40px;
+    display: inline-block;
+}
+.rong-issue-pdf:hover{
+  color: #5cadff;
+}
 .rong-issue-delete{
     position: absolute;
     right: 26px;
@@ -148,6 +160,9 @@ export default {
 }
 .rong-issue-add:hover{
     color: #5cadff;
+}
+.rong-issue-custrom{
+   color: #5cadff;
 }
 .rong-issue-status{
     width: 40px;

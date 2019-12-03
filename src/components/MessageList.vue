@@ -25,27 +25,37 @@
             <div class="rong-Message-img">
                 
                 <!-- <img :src="'data:image/jpeg;base64,' + message.content.content" alt=""> -->
-                <img :src="message.content.imageUri" alt="">
+                <!-- <img :src="message.content.imageUri" alt=""> -->
+                <div class="demo-image__preview">
+                <el-image 
+                    style="width: 100px; height: 100px"
+                    :src= "message.content.imageUri"
+                    :preview-src-list="[message.content.imageUri]">
+                </el-image>
+            </div>
             </div>
           </div>
-          <div class="clear"></div> 
+          <div class="rong-clear"></div> 
       </div>
       <div v-if='message.messageType == "FileMessage"' class="rong-message" >
           <div class="rong-message-header" :class="[message.messageDirection != 1 ? 'rong-message-header-left':'rong-message-header-right']">
               <!-- <img :src="message.content.user.portrait" alt=""> -->
-
               <img src="../assets/portrait/01.jpg" alt="">
           </div>
           <div class="rong-message-body" :class="[message.messageDirection != 1 ? 'rong-message-body-left':'rong-message-body-right']">
             <div class="rong-message-username">{{message.content.user.name}}</div>
             <div class="rong-Message-text">
-                <div class="rongcloud-sprite rongcloud-file-icon"></div>            
-                <div class="rongcloud-file-name">{{message.content.name}}</div>            
-                <div class="rongcloud-file-size">{{message.content.size}}</div>            
-                <a class="rongcloud-sprite rongcloud-file-download" :href="message.content.fileUrl"></a>
+                <!-- <div class="rong-sprite rong-file-icon"></div> -->
+                <i class="iconfont icon-wenjian"></i>
+                <div class="rong-message-file-info">
+                    <div class="rong-file-name" :title="message.content.name">{{message.content.name}}</div>            
+                    <div class="rong-file-size">{{message.content.size}}</div>        
+                </div>            
+                <a class="iconfont icon-download rong-down-file" :href="message.content.fileUrl"></a>
                <!-- {{message.content.user.name}} -->
             </div>
           </div>
+          <div class="rong-clear"></div> 
       </div>
       <div v-if='message.messageType == "TimeMessage"' class="rong-message" >
            <b>{{message.sentTime}}</b>
@@ -57,7 +67,7 @@
 <script>
 export default {
     name:'message',
-    props: ['RongIMLib','user',"historyMore"],
+    props: ['RongIMLib','user',"historyMore","userchange"],
     data() {
         return {
             messageList: [],
@@ -70,13 +80,21 @@ export default {
     },
     watch:{
         historyMore(){
-
-            let times = this.messageList[0].sentTime;
-            this.getHistoryMessages(times,true)
-        }
+            if(this.messageList.length > 0){
+                let times = this.messageList[0].sentTime;
+                this.getHistoryMessages(times,true)
+            }  
+        },
+        userchange() {
+            this.messageList = [];
+            this.loaded = true;
+            this.hasMsg = true;
+            this.getHistoryMessages();
+        } 
     },
     methods:{
         getHistoryMessages:function(times,status){
+            console.info('获取历史',this.loaded ,this.hasMsg)
             if(this.loaded && this.hasMsg){
                 var content = this;
                 var conversationType = this.RongIMLib.ConversationType.GROUP;
@@ -84,6 +102,7 @@ export default {
                 var timestrap = times ?  times : 0; 
                 var count = 20;
                 this.loaded = false;
+                console.log('targetId', targetId); 
                 this.RongIMLib.RongIMClient.getInstance().getHistoryMessages(conversationType, targetId, timestrap, count, {
                 onSuccess: function(list,hasMsg) {
                     content.messageList = [...list,...content.messageList];  
@@ -94,7 +113,6 @@ export default {
                         content.$emit('setScrollTop');
                         return;
                     }
-                    // content.$emit('setScrollTop',tr);
                 },
                 onError: function(error) {
                     console.log('获取历史消息失败', error);
@@ -185,5 +203,54 @@ export default {
 }
 .rong-message-body-right .rong-message-username{
     text-align: right;
+}
+.rong-sprite{
+    width: 40px;
+    height: 40px;
+}
+.rong-file-icon{
+    background-image: url(../assets/logo.png);
+}
+.rong-Message-text i{
+    width: 40px;
+    height: 35px;
+    display: inline-block;
+    border: 1px solid;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 30px;
+    padding-top: 5px;
+    vertical-align: text-bottom;
+    margin-right: 10px;
+    background: #fff;
+    color: #5cadff;
+}
+.rong-message-file-info{
+    display: inline-block;
+    max-width: 120px;
+}
+.rong-file-name{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+.rong-down-file{
+    text-decoration: none;
+    cursor: pointer;
+}
+.rong-message .icon-download{
+    color: #717070;
+}
+.rong-message .icon-download:hover{
+    color: #5cadff;
+}
+.rong-message-body-right .icon-download{
+    color: #fff;
+}
+.rong-message-body-right .icon-download:hover{
+    color: #717070;
 }
 </style>

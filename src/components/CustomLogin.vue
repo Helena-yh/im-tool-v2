@@ -34,15 +34,29 @@ export default {
   },
 
   created: function() {
+    let content = this;
     this.user.id = this.$route.params.id;
     this.user.targetId = this.$route.params.groupId;
     this.user.name = localStorage.getItem("rong_user_name");
+    document.onkeypress = function(e) {
+      var keycode = document.all ? event.keyCode : e.which;
+      if (keycode == 13) {
+        content.login();// 登录方法名
+      }
+    };
   },
   methods: {
     login: function() {
-      // this.getToken();
-      // this.getUserInfo();
+      if(!this.user.name){
+          this.$message({
+            showClose: true,
+            message: "请输入群昵称！",
+            type: "error"
+          });
+         return;
+        }
       this.joinGroup();
+
     },
     joinGroup: function() {
       let group = {
@@ -107,3 +121,8 @@ export default {
   margin-top: calc(50vh - 146px);
 }
 </style>
+
+{
+        appKey: "c9kqb3rdc4j5j",
+        token: "hLAgS8e0Pmkv/FXx//nuRA4utwPvM1RDHNv/sHN/X2ELAl4P+w9qQr0L7Lm3lNi41uxERnLnQ0B2zKjtW1+ZDQ=="
+    }

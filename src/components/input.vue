@@ -1,9 +1,9 @@
 <template>
   <div class="rong-input-main">
     <div class="rong-input-buts">
-      <span class="iconfont icon-smile" @click="emgioClick()"></span>
-      <span class="iconfont icon-tupian" @click="imgClick('image')"></span>
-      <span class="iconfont icon-file" @click="imgClick('file')"></span>
+      <span class="rong-input-btn iconfont icon-smile" @click="emgioClick()"></span>
+      <span class="rong-input-btn iconfont icon-tupian" @click="imgClick('image')"></span>
+      <span class="rong-input-btn iconfont icon-file" @click="imgClick('file')"></span>
       <input
         class="rong-input-file"
         type="file"
@@ -20,7 +20,7 @@
         ref="file"
       />
     </div>
-    <el-input type="textarea" :rows="2" placeholder v-model="textarea"></el-input>
+    <el-input type="textarea" :rows="2" placeholder v-model="textarea" @keyup.enter.native="sendTextMessage"></el-input>
     <i class="rong-input-send" @click="sendTextMessage()"></i>
     <div :class="['rong-emojis',{'rong-emojis-show':emjioShow}]">
       <span
@@ -49,9 +49,15 @@ export default {
       }
     };
   },
+  watch:{
+    user(newV,oldV) {
+        // do something
+        console.log(newV,oldV)
+    } 
+  },
   methods: {
-    sendTextMessage: function() {
-      if (!this.textarea.length) {
+    sendTextMessage: function(e) {
+      if (!this.textarea.length || e.shiftKey) {
         return;
       }
       var msg = new this.RongIMLib.TextMessage({
@@ -174,13 +180,14 @@ export default {
 
 <style>
 .iconfont {
-  color: #808080;
   font-size: 24px;
-  /* margin-right: 10px; */
-  cursor: pointer;
 }
-.iconfont:hover {
-  color: #252525;
+.rong-input-btn{
+   color: #808080;
+   cursor: pointer;
+}
+.rong-input-btn:hover{
+   color: #252525;
 }
 .rong-input-main {
   height: 100%;

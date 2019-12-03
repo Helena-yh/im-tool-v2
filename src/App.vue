@@ -27,6 +27,20 @@ body {
   overflow: hidden;
   font-family: "Hiragino Sans GB", "Microsoft YaHei", "WenQuanYi Micro Hei", sans-serif;
 }
+@media print {
+    html, body {
+      height: inherit;
+    }
+    #app {
+      height: inherit;
+    }
+    .rong-app-main-down{
+      height: inherit !important;
+    }
+    .rong-down-pdf {
+        height: inherit !important;
+    }
+}
 #app {
   font-family: "Avenir", Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;

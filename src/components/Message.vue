@@ -26,7 +26,7 @@
           </div>
           <div class="clear"></div> 
       </div>
-      <div v-if='message.messageType == "FileMessage"' class="rong-message" >
+       <div v-if='message.messageType == "FileMessage"' class="rong-message" >
           <div class="rong-message-header" :class="[message.messageDirection != 1 ? 'rong-message-header-left':'rong-message-header-right']">
               <!-- <img :src="message.content.user.portrait" alt=""> -->
               <img src="../assets/portrait/01.jpg" alt="">
@@ -34,12 +34,17 @@
           <div class="rong-message-body" :class="[message.messageDirection != 1 ? 'rong-message-body-left':'rong-message-body-right']">
             <div class="rong-message-username">{{message.content.user.name}}</div>
             <div class="rong-Message-text">
-                <div class="rongcloud-sprite rongcloud-file-icon"></div>            
-                <div class="rongcloud-file-name">{{message.content.name}}</div>            
-                <div class="rongcloud-file-size">{{message.content.size}}</div>            
-                <a class="rongcloud-sprite rongcloud-file-download" :href="message.content.fileUrl"></a>
+                <!-- <div class="rong-sprite rong-file-icon"></div> -->
+                <i class="iconfont icon-wenjian"></i>
+                <div class="rong-message-file-info">
+                    <div class="rong-file-name" :title="message.content.name">{{message.content.name}}</div>            
+                    <div class="rong-file-size">{{message.content.size}}</div>        
+                </div>            
+                <a class="iconfont icon-download rong-down-file" :href="message.content.fileUrl"></a>
+               <!-- {{message.content.user.name}} -->
             </div>
           </div>
+          <div class="rong-clear"></div> 
       </div>
       <div v-if='message.messageType == "TimeMessage"' class="rong-message" >
            <b>{{message.sentTime}}</b>

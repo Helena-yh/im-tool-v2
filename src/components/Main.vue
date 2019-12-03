@@ -1,6 +1,6 @@
 <template>
-  <div class="rong-app-main">
-    <div class="rong-main">
+  <div :class="[downPDFStatus ? 'rong-app-main-down':'rong-app-main']">
+    <div v-if="!downPDFStatus" class="rong-main">
       <el-container>
         <el-aside width="80px" class="rong-menu" v-if="role == 'admin'">
           <el-menu default-active="1" class="el-menu-vertical-demo">
@@ -13,7 +13,7 @@
           </el-menu>
         </el-aside>
         <el-aside width="300px">
-          <IssueList v-if="showMenu == 'issue'" :role="role" :targetId="user.targetId"></IssueList>
+          <IssueList v-if="showMenu == 'issue'" :role="role" :targetId="user.targetId" @downLoadPDF="downLoadPDF"></IssueList>
           <ConversationList v-if="showMenu == 'conversation'" :RongIMLib="RongIMLib" :user="user" @changeConversation="changeConversation"></ConversationList>
         </el-aside>
         <el-main>
@@ -29,6 +29,7 @@
                     :RongIMLib="RongIMLib"
                     :user="user"
                     @setScrollTop="setScrollTop"
+                    :userchange="userchange"
                     :historyMore="historyMore"></MessageHistory>
                   <Message
                     v-for="newMessage in newMessageList"
@@ -38,13 +39,14 @@
                 </div>
               </div>
               <div class="rong-conversation-foot">
-                <SendBox :RongIMLib="RongIMLib" :user="user" @pushMessage="sendMessageHandle"></SendBox>
+                <SendBox :RongIMLib="RongIMLib" :user="user" @pushMessage="sendMessageHandle" ref="SendBox"></SendBox>
               </div>
             </div>
           </div>
         </el-main>
       </el-container>
     </div>
+    <DownLoadPDF v-else :issueList="issueList" @goBack="goBack"></DownLoadPDF>
   </div>
 </template>
 
@@ -52,10 +54,6 @@
 require("../assets/js/RongIMLib-2.5.1");
 require("../assets/js/protobuf-2.3.6.min.js");
 require("../assets/js/RongEmoji-2.2.7");
-
-// require("../assets/js/upload/qiniu");
-// require("../assets/js/upload/upload");
-// require("../assets/js/upload/upload");
 
 var RongIMLib = window.RongIMLib;
 var RongIMClient = RongIMLib.RongIMClient;
@@ -65,6 +63,7 @@ import MessageHistory from "./MessageList";
 import SendBox from "./Input";
 import IssueList from "./IssueList";
 import ConversationList from "./ConversationList";
+import DownLoadPDF from "./DownFile";
 
 import Header from "./Header";
 
@@ -79,7 +78,10 @@ export default {
       newMessageList: [],
       historyMore: 0,
       mute: "禁言",
-      showMenu: "issue"
+      showMenu: "issue",
+      userchange:0,
+      downPDFStatus:false,
+      issueList:[]
     };
   },
   components: {
@@ -88,7 +90,8 @@ export default {
     SendBox,
     IssueList,
     Header,
-    ConversationList
+    ConversationList,
+    DownLoadPDF
   },
   mounted: function() {
     this.init();
@@ -151,9 +154,11 @@ export default {
       this.setScrollTop();
     },
     setScrollTop: function() {
-      this.$nextTick(() => {
-        this.$refs.box1.scrollTop = this.$refs.box1.scrollHeight;
-      });
+      if(this.$refs.box1){
+        this.$nextTick(() => {
+          this.$refs.box1.scrollTop = this.$refs.box1.scrollHeight;
+        });
+      }
     },
     onScroll: function() {
       if (this.$refs.box1.scrollTop < 50) {
@@ -165,15 +170,30 @@ export default {
     },
     changeConversation:function(conversation){
       this.$nextTick(() => {
-        this.user.groupId = conversation.targetId;
+        this.user.targetId = conversation.targetId;
+        this.userchange++;
       });
-      
+      this.newMessageList = [];
+    },
+    downLoadPDF:function(issueList) {
+      // console.info(issueList);
+      this.issueList = issueList;
+      this.downPDFStatus = true;
+    },
+    goBack:function() {
+      this.downPDFStatus = false;
     }
   }
 };
 </script>
 
 <style scoped>
+.rong-app-main-down{
+  height: 100vh;
+  width: 80vw;
+  background: #fff;
+  margin: 0 auto;
+}
 .rong-menu {
   background: #303840;
   text-align: center;

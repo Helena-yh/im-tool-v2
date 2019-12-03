@@ -25,17 +25,40 @@ export default {
       mainShow: false,
       token: "",
       user: {
-        id: "",
-        name: "",
-        targetId: ""
+        id: "Helena",
+        name: "Helena",
+        targetId: "support1"
       }
     };
   },
   components: {
     Main
   },
+  created() {
+    let content = this;
+    document.onkeypress = function(e) {
+      var keycode = document.all ? event.keyCode : e.which;
+      if (keycode == 13) {
+        content.login();// 登录方法名
+         return false;
+      }
+    };
+  },
   methods: {
     login: function() {
+      for (const key in this.user) {
+        if (this.user.hasOwnProperty(key)) {
+          let val = this.user[key];
+          if(!val){
+            this.$message({
+              showClose: true,
+              message: "请检查输入框，不可为空！",
+              type: "error"
+            });
+            return
+          }
+        }
+      }
       this.joinGroup();
     },
     joinGroup: function() {

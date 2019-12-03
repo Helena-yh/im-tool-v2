@@ -1,6 +1,6 @@
 <template>
   <div class="rong-conversation-list">
-    <div class="rong-conversation" 
+    <div :class="['rong-conversation',conversation.targetId == selectConversation ?'rong-conversation-select':'']" 
         v-for="conversation in conversationList" 
         :key="conversation.targetId"
         @click="openConversation(conversation)">
@@ -12,10 +12,16 @@
           <div class="rong-conversation-body">
             <div class="rong-conversation-info">
                 <span class="rong-converation-name">{{conversation.targetId}}</span>
-                <span>{{conversation.latestMessage.sentTime}}</span>
+                <span class="rong-converation-time">{{conversation.latestMessage.sentTime | formatDate}}</span>
             </div>
-            <div class="rong-conversation-message">
+            <div class="rong-conversation-message" v-if="conversation.latestMessage.messageType == 'TextMessage'">
                 {{conversation.latestMessage.content.content}}
+            </div>
+             <div class="rong-conversation-message" v-if="conversation.latestMessage.messageType == 'ImageMessage'">
+                [ 图片 ]
+            </div>
+             <div class="rong-conversation-message" v-if="conversation.latestMessage.messageType == 'FileMessage'">
+                [ 文件 ]
             </div>
           </div>
         </div>
@@ -24,16 +30,25 @@
 </template>
 
 <script>
+import {formatDate} from '../assets/js/util';
 export default {
   name: "conversation",
   props: ["RongIMLib", "user"],
   data() {
     return {
-      conversationList: []
+      conversationList: [],
+      selectConversation: ''
     };
+  },
+  filters: {
+    formatDate(time) {
+      var date = new Date(time);
+      return formatDate(date);
+    }
   },
   mounted:function(){
       this.getConversationList();
+      this.selectConversation = this.user.targetId;
   },
   methods: {
     getConversationList: function() {
@@ -51,7 +66,10 @@ export default {
         },conversationTypes,count);
     },
     openConversation:function(conversation){
-        //通知父组件更换新群组 id重新渲染。
+        if(this.selectConversation == conversation.targetId){
+          return;
+        }
+        this.selectConversation = conversation.targetId;
         this.$emit("changeConversation",conversation)
         console.info(conversation);
     }
@@ -70,10 +88,19 @@ export default {
   height: 80px;
   border-bottom: 1px solid #30383f;
   color: #a5b5c1;
-  padding-left: 10px;
+  /* padding-left: 10px; */
+}
+.rong-converation-time{
+  font-size: 12px;
+  position: absolute;
+  right: 0px;
+}
+.rong-conversation-select{
+  background: #4f5863;
 }
 .rong-conversation-main{
-  padding: 20px 0;
+  padding: 20px 10px;
+  /* padding-left: 10px; */
 }
 .rong-conversation:hover{
   background-color: #404953;
@@ -89,6 +116,8 @@ export default {
 }
 .rong-conversation-info{
   display: inline-block;
+  position: relative;
+  width: 230px;
 }
 .rong-conversation-body{
   display: inline-block;
