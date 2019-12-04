@@ -25,9 +25,9 @@ export default {
       mainShow: false,
       token: "",
       user: {
-        id: "Helena",
-        name: "Helena",
-        targetId: "support1"
+        id: "",
+        name: "",
+        targetId: ""
       }
     };
   },
@@ -110,7 +110,7 @@ export default {
       let user = {};
       let portrait = localStorage.getItem("rong_user_"+this.user.name);
       if(!portrait){
-        portrait = Math.ceil(Math.random()*7);
+        portrait = Math.ceil(Math.random()*6);
         this.saveUserInfo(this.user.name,portrait);
       }
   

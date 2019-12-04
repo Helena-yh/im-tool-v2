@@ -9,7 +9,7 @@ export default {
             component: CustomLogin
         },
         { 
-            path: '/rongAdmin', 
+            path: '/rongadmin', 
             name: 'adminLogin', 
             component: AdminLogin
         }

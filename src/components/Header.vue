@@ -2,10 +2,10 @@
   <el-header>
     <div class="rong-main-header">
       <img src="../../public/favicon.png" alt />
-      <input type="text" v-model="groupName" @change="setInfos()"/>
+      <input type="text" v-model="groupName" @change="setInfos('groupName')"/>
       <!-- <span>{{groupName}}</span> -->
-      <el-tooltip class="item" effect="dark" :content="muteTitle[mute]" placement="bottom" v-if="role == 'admin'">
-        <i :class="['iconfont',  mute ? 'icon-xiaoxi':'icon-jinyan']" @click="setInfos()"></i>
+      <el-tooltip class="item" effect="dark" :content="muteTitle.mute[mute]" placement="bottom" v-if="role == 'admin'">
+        <i :class="['iconfont',  mute ? 'icon-xiaoxi':'icon-jinyan']" @click="setInfos('mute')"></i>
       </el-tooltip>
     </div>
   </el-header>
@@ -18,8 +18,11 @@ export default {
   data() {
     return {
       muteTitle: {
-        0: "禁言",
-        1: "解禁"
+        groupName:'修改群组名称',
+        mute:{
+          0: "禁言",
+          1: "解禁"
+        }
       },
       mute: 0,
       clientIds: [],
@@ -28,6 +31,11 @@ export default {
   },
   mounted: function() {
       this.getMuteStatus();
+  },
+  watch:{
+    userchange() {
+      this.getMuteStatus();
+    } 
   },
   methods: {
     getMuteStatus: function() {
@@ -48,30 +56,36 @@ export default {
         });
       });
     },
-    setInfos:function(){
+    setInfos:function(flag){
       let content = this;
-      let status = this.mute ? 0 : 1;
       let data = {
         groupId: this.groupId,
-        muteStatus: status,
-        clientIds: this.clientIds,
         groupName:this.groupName
       }; 
+      let status = this.mute ? 0 : 1;
+      if("mute" == flag){    
+        data.muteStatus = status;
+        data.clientIds = this.clientIds;
+      }
+      
       this.$axios.post(this.config.host + "/group/set_infos", data).then(res => {
+        let message = content.muteTitle[flag];
         if (res.data.code == 200) {
-          
+          if("mute" == flag){
+           message = content.muteTitle[flag][content.mute] ;
+           content.mute = status;
+          }
           this.$message({
             showClose: true,
-            message: content.muteTitle[content.mute] + "成功",
+            message: message + "成功",
             type: "success"
           });
-          content.mute = status;
-          return;
           
+          return;
         }
         this.$message({
           showClose: true,
-          message: content.muteTitle[status] + "失败",
+          message: message + "失败",
           type: "error"
         });
       });

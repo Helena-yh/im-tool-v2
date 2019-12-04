@@ -5,7 +5,7 @@ import ElementUI from 'element-ui'
 import axios from 'axios'  
 import qs from 'qs';
 
-import Config from './config'
+import Config from '../public/static/config'
 
 Vue.prototype.$axios = axios;
 Vue.prototype.$qs = qs;

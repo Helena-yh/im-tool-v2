@@ -25,10 +25,11 @@
             <i v-else :class="['rong-issue-status','rong-issue-custrom','iconfont',issue.status == 0 ? 'icon-daichuli-copy' : 'icon-chenggongyijiejue']"></i>
             <input :title="issue.description" class="rong-issue-description" type="text" 
                     v-model="issue.description" 
+                    placeholder="请输入问题"
                     @change="updateIssue(issue)"/>
             <i  v-if="role == 'admin'" class="rong-issue-delete iconfont icon-delete" @click="deleteIssue(issue)"></i>
           </template>
-          <textarea class="rong-issue-solution" v-model="issue.solution" :readonly="role =='cutrom'"  @change="updateIssue(issue)"></textarea>
+          <textarea class="rong-issue-solution" v-model="issue.solution" :readonly="role =='cutrom'" placeholder="暂无" @change="updateIssue(issue)"></textarea>
         </el-collapse-item>
       </el-collapse>
     </div>
@@ -49,7 +50,7 @@ export default {
   },
   methods: {
     addIssue: function() {
-      var data = { groupId: this.targetId,solution: "123", description: "123" }; //定义一个data储存需要带的参数
+      var data = { groupId: this.targetId,solution: "", description: "" }; //定义一个data储存需要带的参数
       this.$axios.post(this.config.host + "/question/add", data).then(res => {
           console.info(res);
           if (res.data.code == 200) {
@@ -82,7 +83,6 @@ export default {
       this.$axios.post(this.config.host + "/question/modify", issue).then(res => {
           if (res.data.code == 200) {
             console.info(res);
-
             this.getIssueList();
             return;
           }

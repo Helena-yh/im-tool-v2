@@ -102,7 +102,7 @@ export default {
             content.textarea = "";
             content.$emit("pushMessage", message);
             console.log("发送文本消息成功", message);
-            content.emjioShow = !content.emjioShow;
+            content.emjioShow = false;
             //列表中添加消息--通知父级元素
           },
           onError: function(errorCode, message) {
@@ -128,7 +128,7 @@ export default {
       // var fileType = RongIMLib.FileType.FILE; // 图片类型
       let content = this;
       var config = {
-        domain: 'http://upload.qiniu.com',
+        domain: '//upload.qiniu.com',
         fileType: fileType,
         getToken: function(callback) {
           content.RongIMLib.RongIMClient.getInstance().getFileToken(fileType, {
@@ -177,7 +177,7 @@ export default {
     },
     imgClick: function(ref) {
       this.$refs[ref].click();
-      this.emjioShow = !this.emjioShow;
+      this.emjioShow = false;
     }
   }
 };
