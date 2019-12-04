@@ -1,7 +1,7 @@
 <template>
   <div class="rong-login">
     <div class="rong-login-main" v-if="!mainShow">
-      <img class="rong-login-logo" src="../assets/logo_blue.png" alt />
+      <span class="rong-login-logo"></span>
       <el-input class="rong-login-input" placeholder="请输名称" v-model="user.name" clearable ></el-input>
       <el-button type="primary" @click="login()">加入</el-button>
     </div>
@@ -97,13 +97,17 @@ export default {
       localStorage.setItem("rong_user_" + key,value);
     },
     getUserInfo:function(){
-      let portrait = localStorage.getItem("rong_user_portrait");
+      let user = {};
+      let portrait = localStorage.getItem("rong_user_"+this.user.name);
       if(!portrait){
-        portrait = Math.ceil(Math.random()*6);
-        this.saveUserInfo('portrait',portrait);
+        portrait = Math.ceil(Math.random()*7);
+        this.saveUserInfo(this.user.name,portrait);
       }
+  
       this.saveUserInfo('name',this.user.name);
-      this.user.portrait = '../assets/portrait/0' + portrait + '.jpg';
+      this.user.portrait =  this.config.portraitList[portrait];
+      console.info('-----user.name',this.user);
+      return user;
     }
   }
 };
@@ -113,6 +117,10 @@ export default {
 .rong-login-logo {
   width: 200px;
   margin-bottom: 40px;
+  height: 52px;
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-image: url(../../public/static/logo_blue.png);
 }
 .rong-login-input {
   padding-bottom: 20px;

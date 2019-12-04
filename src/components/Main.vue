@@ -32,6 +32,7 @@
                     :userchange="userchange"
                     :historyMore="historyMore"></MessageHistory>
                   <Message
+                    :RongIMLib="RongIMLib"
                     v-for="newMessage in newMessageList"
                     :key="newMessage.messageUid"
                     :message="newMessage"

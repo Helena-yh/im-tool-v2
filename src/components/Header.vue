@@ -2,8 +2,8 @@
   <el-header>
     <div class="rong-main-header">
       <img src="../../public/favicon.png" alt />
-      <span>技术支持工具</span>
-
+      <input type="text" v-model="groupName" @change="setInfos()"/>
+      <!-- <span>{{groupName}}</span> -->
       <el-tooltip class="item" effect="dark" :content="muteTitle[mute]" placement="bottom" v-if="role == 'admin'">
         <i :class="['iconfont',  mute ? 'icon-xiaoxi':'icon-jinyan']" @click="setInfos()"></i>
       </el-tooltip>
@@ -22,7 +22,8 @@ export default {
         1: "解禁"
       },
       mute: 0,
-      clientIds: []
+      clientIds: [],
+      groupName:''
     };
   },
   mounted: function() {
@@ -36,6 +37,8 @@ export default {
         if (res.data.code == 200) {
           content.mute = res.data.result[0].muteStatus;
           content.clientIds = res.data.result[0].clientIds;
+          content.groupName = res.data.result[0].groupName;
+          console.info(res.data.result[0])
           return;
         }
         this.$message({
@@ -51,7 +54,8 @@ export default {
       let data = {
         groupId: this.groupId,
         muteStatus: status,
-        clientIds: this.clientIds
+        clientIds: this.clientIds,
+        groupName:this.groupName
       }; 
       this.$axios.post(this.config.host + "/group/set_infos", data).then(res => {
         if (res.data.code == 200) {
@@ -101,7 +105,7 @@ export default {
   margin-top: 14px;
   position: absolute;
 }
-.rong-main-header span {
+.rong-main-header input {
   margin-left: 40px;
   display: inline-block;
   min-width: 174px;
@@ -109,6 +113,14 @@ export default {
   overflow: hidden;
   text-overflow: ellipsis;
   width: 80%;
+  height: 46px;
+  background: #f5f5f5;
+  border: 0px;
+  font-size: 16px;
+  color: #4a4949;
+}
+.rong-main-header input:focus{
+  outline: 0px;
 }
 .rong-main-header i {
   position: absolute;

@@ -154,6 +154,7 @@ export default {
     right: 26px;
     display: inline-block;
     font-size: 14px;
+    color: #878788;
 }
 .rong-issue-delete:hover{
     color: #e7e7e7

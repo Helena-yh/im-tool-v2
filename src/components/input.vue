@@ -27,7 +27,7 @@
         class="rong-emoji"
         v-for="emoji in emojiList"
         :key="emoji.unicode"
-        v-html="emoji.emoji"
+        v-html="emojiToHtml(emoji.emoji)"
         @click="chooseEmoji(emoji)"
       ></span>
     </div>
@@ -56,8 +56,11 @@ export default {
     } 
   },
   methods: {
+    emojiToHtml:function(message){
+      return this.RongIMLib.RongIMEmoji.emojiToHTML(message);
+    },
     sendTextMessage: function(e) {
-      if (!this.textarea.length || e.shiftKey) {
+      if (!this.textarea.length || (e && e.shiftKey)) {
         return;
       }
       var msg = new this.RongIMLib.TextMessage({
@@ -99,6 +102,7 @@ export default {
             content.textarea = "";
             content.$emit("pushMessage", message);
             console.log("发送文本消息成功", message);
+            content.emjioShow = !content.emjioShow;
             //列表中添加消息--通知父级元素
           },
           onError: function(errorCode, message) {
@@ -173,6 +177,7 @@ export default {
     },
     imgClick: function(ref) {
       this.$refs[ref].click();
+      this.emjioShow = !this.emjioShow;
     }
   }
 };

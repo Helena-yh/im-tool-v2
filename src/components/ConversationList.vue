@@ -8,14 +8,13 @@
             <img src="" alt="">
         </div> -->
         <div class="rong-conversation-main">
-          <img src="../assets/portrait/01.jpg" alt="">
+          <span class="rong-conversation-img"></span>
           <div class="rong-conversation-body">
             <div class="rong-conversation-info">
                 <span class="rong-converation-name">{{conversation.targetId}}</span>
                 <span class="rong-converation-time">{{conversation.latestMessage.sentTime | formatDate}}</span>
             </div>
-            <div class="rong-conversation-message" v-if="conversation.latestMessage.messageType == 'TextMessage'">
-                {{conversation.latestMessage.content.content}}
+            <div class="rong-conversation-message" v-if="conversation.latestMessage.messageType == 'TextMessage'" v-html="emojiToHtml(conversation.latestMessage.content.content)">
             </div>
              <div class="rong-conversation-message" v-if="conversation.latestMessage.messageType == 'ImageMessage'">
                 [ 图片 ]
@@ -51,6 +50,9 @@ export default {
       this.selectConversation = this.user.targetId;
   },
   methods: {
+    emojiToHtml:function(message){
+      return this.RongIMLib.RongIMEmoji.emojiToHTML(message);
+    },
     getConversationList: function() {
       var conversationTypes = [this.RongIMLib.ConversationType.GROUP];
       var count = 150;
@@ -105,11 +107,14 @@ export default {
 .rong-conversation:hover{
   background-color: #404953;
 }
-.rong-conversation-main img{
+.rong-conversation-img{
   width: 36px;
   height: 36px;
   border-radius: 50%;
   display: inline-block;
+  background-image: url(../../public/static/01.jpg);
+  background-repeat: no-repeat;
+  background-size: 100%;
 }
 .rong-converation-name{
   color: #f7f7f8
